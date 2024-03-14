@@ -14,13 +14,13 @@ M.highlight = function (buf, filetype, first_line_num, last_line_num)
   -- search lines
   for i, line in ipairs(lines) do
     if line:match("^%s*" .. escaped_comment_syntax) then
-      j = 1
+      local j = 1
 
       -- highlight line
       while true do
         local word_start, word_end = string.find(line, "FIXME", j)
 
-        if word_start then
+        if word_start and word_end then
           j = word_end
 
           vim.api.nvim_buf_add_highlight(
@@ -43,7 +43,9 @@ M.setup = function ()
   local ns_id = vim.api.nvim_create_namespace("FixMeHighlighting")
   vim.api.nvim_set_hl_ns(ns_id)
   vim.api.nvim_set_hl(ns_id, "FixMe", {
-    bg = "#FFBD00"
+    fg = "#FFFFFF",
+    bg = "#FF00EB",
+    bold = true
   })
 
   return ns_id
