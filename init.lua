@@ -1,14 +1,62 @@
 local M = {}
 
-M.highlight = function (buf, first_line_num, last_line_num)
+M.config = {
+  lang_comment_syntax = {
+    lua = {
+      ext = "lua",
+      s = '--',
+      m = "--\\[\\[#--\\]\\]"
+    },
+    ruby = {
+      ext = "rb",
+      s = '#',
+      m = [[=begin#=end]]
+    },
+    javascript = {
+      ext = "js",
+      s = '//',
+      m = [[/*#*/]]
+    },
+    typescript = {
+      ext = "ts",
+      s = '//',
+      m = [[/*#*/]]
+    },
+    rust = {
+      ext = "rs",
+      s = '//'
+    },
+    python = {
+      ext = "py",
+      s = '#',
+      m = [["""#"""]]
+    },
+    html = {
+      ext = "html",
+      m = [[<!--#-->]]
+    },
+    css = {
+      ext = "css",
+      s = '//',
+      m = [[/*#*/]]
+    },
+  }
+}
+
+M.highlight = function (buf, filetype, first_line_num, last_line_num)
   -- get the lines from the buffer
   local lines = vim.api.nvim_buf_get_lines(buf, first_line_num, last_line_num, false)
+  local comment_syntax = M.config.lang_comment_syntax[filetype].s
+  local escaped_comment_syntax = ""
+
+  for i=1, #comment_syntax do
+    local c = comment_syntax:sub(i,i)
+    escaped_comment_syntax = escaped_comment_syntax .. "%" .. c
+  end
 
   -- search lines
   for i, line in ipairs(lines) do
-
-    -- FIXME only matches lua single line comments for now
-    if string.match(line, "^%s*%-%-") then
+    if line:match("^%s*" .. escaped_comment_syntax) then
       j = 1
 
       -- highlight line
@@ -49,7 +97,7 @@ M.attach = function ()
 
   vim.api.nvim_buf_attach(cur_buf, true, {
     on_lines = function (_lines, _bufnr, _tick, first_line_num, _orig_last_line, last_line_num)
-      M.highlight(cur_buf, first_line_num, last_line_num)
+      M.highlight(cur_buf, vim.bo.filetype, first_line_num, last_line_num)
     end
   })
 end
@@ -66,13 +114,13 @@ vim.api.nvim_create_autocmd(
   }
 )
 
--- highlight after loading file into buffer
+-- highlight all lines after loading file into buffer
 vim.api.nvim_create_autocmd(
   {"BufRead"},
   {
     callback = function()
       local cur_buf = vim.api.nvim_get_current_buf()
-      M.highlight(cur_buf, 1, -1)
+      M.highlight(cur_buf, vim.bo.filetype, 0, -1)
     end
   }
 )
