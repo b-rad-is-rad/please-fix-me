@@ -1,5 +1,6 @@
 local M = require("config")
 
+
 M.highlight = function (buf, filetype, first_line_num, last_line_num)
   -- get the lines from the buffer
   local lines = vim.api.nvim_buf_get_lines(buf, first_line_num, last_line_num, false)
@@ -60,7 +61,7 @@ M.setup = function ()
     vim.api.nvim_set_hl(ns_id, search_term:lower(), hl_config)
   end
 
-  return ns_id
+  M.hl_ns_id = ns_id
 end
 
 M.attach = function ()
@@ -73,7 +74,8 @@ M.attach = function ()
   })
 end
 
-M.hl_ns_id = M.setup()
+M.setup()
+
 -- attach edit listener when we enter a buffer or window
 -- TODO FIXME terminal and telescope buffers cause errors because filetype is nil or something weird
 vim.api.nvim_create_autocmd(
