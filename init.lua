@@ -1,4 +1,4 @@
-local M = require("config")
+local M = require("please-fix-me.config")
 
 
 M.highlight = function (buf, filetype, first_line_num, last_line_num)
